@@ -85,6 +85,10 @@
         (list '- -)
         (list '/ /)
         (list '* *)
+        (list '= =)
+        (list 'eq? eq?)
+        (list 'equal? equal?)
+        (list 'eqv? eqv?)
         ))
 
 (define primitive-procedure-names
