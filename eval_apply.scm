@@ -37,15 +37,32 @@
              ))) ;end of 'scan definition
     
     (if (eq? env the-empty-environment) ; in env-loop definition
-        (error "unbound variable" var)
+        (error "unbound variable - in lookup-variable-value" var)
         (let ((frame (first-frame env))) ; bind 'frame to the innermost frame in the environment, if the environment isn't empty
           (scan (frame-variables frame) ; call scan
                 (frame-values frame))))
     );end of 'env-loop definition
   (env-loop env));lookup-variable-value is essentially one line after its definitions: it just calls the env-loop routine it defines
-            
 
-
+;note: set-variable-value and lookup share almost the entire structure.  the only difference is (set-car! vals val) instead of car vals when we find the variable (when (eq? var (car vars))
+(define (set-variable-value! var val env)
+  (define (env-loop env) ; internal definition of env-loop: literally exactly the same as that in lookup! possible to-do for later would be to clean up that repetition
+    (define (scan vars vals) ; internal definition of scan
+      (cond ((null? vars) ; if there are no vars left, go to env-loop in enclosing environment
+             (env-loop (enclosing-environment env)))
+            ((eq? var (car vars))
+             (set-car! vals val)) ; if we found the variable, mutate the car of the list to point to the new value
+            (else
+             (scan (cdr vars) (cdr vals)) ; "loop" through the variable list in search of var, if not found yet
+             ))) ;end of 'scan definition
+    
+    (if (eq? env the-empty-environment) ; in env-loop definition
+        (error "unbound variable - in set-variable-value" var)
+        (let ((frame (first-frame env))) ; bind 'frame to the innermost frame in the environment, if the environment isn't empty
+          (scan (frame-variables frame) ; call scan
+                (frame-values frame))))
+    );end of 'env-loop definition
+  (env-loop env));set-variable-value is essentially one line after its definitions: it just calls the env-loop routine it defines
 
 (define frame0 (make-frame (list 'x 'y) (list 5 6 ))) (add-binding-to-frame! 'z 7 frame0) (display frame0) (frame-variables frame0) (frame-values frame0) ;illustrates building a frame
 (define env0 (cons frame0 the-empty-environment))
@@ -53,6 +70,8 @@
 env1
 (first-frame env1) ;the innermost frame
 (enclosing-environment env1) ;the enclosing environment
-(lookup-variable-value 'x env1)
+(lookup-variable-value 'x env1) ; works correctly!
+(set-variable-value! 'y "hello" env1) ; works correctly!
+env1
 ;(first-frame the-empty-environment) ;apparently invalid to call frame selectors on empty environment
 ;(enclosing-environment the-empty-environment) ;apparently invalid to call frame selectors on empty environment
