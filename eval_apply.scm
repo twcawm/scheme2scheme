@@ -16,9 +16,20 @@
   (set-car! frame (cons var (car frame)))
   (set-cdr! frame (cons val (cdr frame))))
 
+;extend-environment: make a new frame as innermost env, use base-env as enclosing env
+(define (extend-environment vars vals base-env)
+  (if (= (length vars) (length vals))
+      (cons (make-frame vars vals) base-env) ;cons the new frame and old base-env
+      (if (< (length vars) (length vals))
+          (error "in extend-environment: len(args) > len(vals)" vars vals)
+          (error "in extend-environment: len(args) < len(vals)" vars vals))))
+
+
 
 
 (define frame0 (make-frame (list 'x 'y) (list 5 6 ))) (add-binding-to-frame! 'z 7 frame0) (display frame0) (frame-variables frame0) (frame-values frame0) ;illustrates building a frame
-
+(define env1 (extend-environment (list 'a 'b 'c) (list "s" "d" "ff") frame0)) ;test extend-environment
+(first-frame env1) ;the innermost frame
+(enclosing-environment env1) ;the enclosing frame (not sure if this is a valid "environment" though
 ;(first-frame the-empty-environment) ;apparently invalid to call frame selectors on empty environment
 ;(enclosing-environment the-empty-environment) ;apparently invalid to call frame selectors on empty environment
