@@ -116,7 +116,7 @@
   (lambda (l env)
     (cond ((eq? l '() ) '() )
           (else
-           (cons (eval (car l) env) (evlist (cdr l env)) ) ) ) ) )
+           (cons (eval (car l) env) (evlist (cdr l) env)) ) ) ) )
 (define evcond ; evaluate conditional 'cond expression
   (lambda (clauses env) ; recall: clauses is a list of lists.  so caar is stuff like "else" or otherwise expressions that eval to false or true
     (cond ((eq? clauses '()) '()) ; if we ran out of clauses, just arbitrarily return '() (there is choice here)
@@ -137,7 +137,7 @@
       ((and (pair? exp) (eq? (car exp) 'quote)) (cadr exp)) ; quoted expression
       ((and (pair? exp) (eq? (car exp) 'lambda)) (list 'closure (cdr exp) env)) ; lambda (function definition)
       ((and (pair? exp) (eq? (car exp) 'cond)) (evcond (cdr exp) env)) ; cond; we defined evcond as a helper for this
-      (else
+      (else ; combination (not a special form)
        (apply (eval (car exp) env) (evlist (cdr exp) env)))
       )))
 
