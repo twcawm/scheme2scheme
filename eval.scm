@@ -33,8 +33,8 @@
   )
 )  
                        
-;next, write evcond
-;and probably need the primitive apply...?
+;currently, our eval can do a few things, but cannot handle things like applying a user-defined lambda to an argument (because the built-in apply does not accept how we've stored the closure)
+;the goal was to see how far we could take the sicp eval without defining our own apply (just using built-in apply)
 (define eval (lambda (exp env)
                (cond
                  ((number? exp) exp)
@@ -66,3 +66,4 @@
 (newline)
 ;(eval '(cond ((> 5 4) 6 ) )) ;broken for now
 (eval '(+ 5 6 ) sre5) ;this currently works in mit-scheme
+(eval '( (lambda (x) (+ x 5) ) 3) sre5) ;this fails in mit-scheme because ";The object (closure ((x) (+ x 5)) #[environment 40]) is not applicable."
