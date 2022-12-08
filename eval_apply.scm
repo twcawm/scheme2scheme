@@ -73,7 +73,10 @@
             ;another valid choice for the above would actually be to throw an error, since we don't necessarily want to allow re-definition
             (else (scan (cdr vars) (cdr vals)))))
     (scan (frame-variables frame) (frame-values frame))))
-  
+
+
+
+;;;tests
 (define frame0 (make-frame (list 'x 'y) (list 5 6 ))) (add-binding-to-frame! 'z 7 frame0) (display frame0) (frame-variables frame0) (frame-values frame0) ;illustrates building a frame
 (define env0 (cons frame0 the-empty-environment))
 (define env1 (extend-environment (list 'a 'b 'c) (list "s" "d" "ff") env0)) ;test extend-environment
