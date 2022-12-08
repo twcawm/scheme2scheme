@@ -76,6 +76,34 @@
 
 
 
+(define primitive-procedures ;we get primitive procedures from the underlying scheme implementation
+  (list (list 'car car)
+        (list 'cdr cdr)
+        (list 'cons cons)
+        (list 'null? null?)
+        (list '+ +)
+        (list '- -)
+        (list '/ /)
+        (list '* *)
+        ))
+
+(define primitive-procedure-names
+  (map car primitive-procedures))
+(define primitive-procedure-objects
+  (map (lambda (proc) list 'primitive (cadr proc)) primitive-procedures))
+
+(define (setup-environment)
+  (let ((initial-env
+         (extend-environment primitive-procedure-names
+                             primitive-procedure-objects
+                             the-empty-environment)))
+    (define-variable! 'true true initial-env)
+    (define-variable! 'false false initial-env)
+    initial-env))
+(define the-global-environment (setup-environment))
+
+
+
 ;;;tests
 (define frame0 (make-frame (list 'x 'y) (list 5 6 ))) (add-binding-to-frame! 'z 7 frame0) (display frame0) (frame-variables frame0) (frame-values frame0) ;illustrates building a frame
 (define env0 (cons frame0 the-empty-environment))
@@ -95,5 +123,6 @@ env1 ; both the inner x and the outer x are still available
 (define-variable! 'a "new-a-value" env1) ; in contrast, when we redefine a variable in the innermost frame, we do not "shadow" its old value.  instead the old value is totally lost.  an alternative option would be to throw an error here.
 env1
 (lookup-variable-value 'a env1)
+the-global-environment
 ;(first-frame the-empty-environment) ;apparently invalid to call frame selectors on empty environment
 ;(enclosing-environment the-empty-environment) ;apparently invalid to call frame selectors on empty environment
