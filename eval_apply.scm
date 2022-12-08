@@ -134,6 +134,9 @@
       ((number? exp) exp) ; number evaluates to itself
       ((string? exp) exp) ; string evaluates to itself
       ((symbol? exp) (lookup-variable-value exp env)) ; symbol evaluates to its lookup value
+      ((and (pair? exp) (eq? (car exp) 'quote)) (cadr exp)) ; quoted expression
+      ((and (pair? exp) (eq? (car exp) 'lambda)) (list 'closure (cdr exp) env)) ; lambda (function definition)
+      ((and (pair? exp) (eq? (car exp) 'cond)) (evcond (cdr exp) env)) ; cond; we defined evcond as a helper for this
       )))
 
 
@@ -160,3 +163,7 @@ env1
 the-global-environment
 ;(first-frame the-empty-environment) ;apparently invalid to call frame selectors on empty environment
 ;(enclosing-environment the-empty-environment) ;apparently invalid to call frame selectors on empty environment
+
+;tests for eval:
+(eval 5 the-global-environment)
+(eval '(lambda (x) (+ x 5 )) the-global-environment)
