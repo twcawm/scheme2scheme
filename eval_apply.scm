@@ -137,6 +137,8 @@
       ((and (pair? exp) (eq? (car exp) 'quote)) (cadr exp)) ; quoted expression
       ((and (pair? exp) (eq? (car exp) 'lambda)) (list 'closure (cdr exp) env)) ; lambda (function definition)
       ((and (pair? exp) (eq? (car exp) 'cond)) (evcond (cdr exp) env)) ; cond; we defined evcond as a helper for this
+      (else
+       (apply (eval (car exp) env) (evlist (cdr exp) env)))
       )))
 
 
