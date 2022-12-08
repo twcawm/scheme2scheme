@@ -91,6 +91,7 @@
         (list 'eqv? eqv?)
         ))
 
+; not 100% why we implement primitive names and procedures as (no-argument) procedures instead of just lists, but it would work either way
 (define (primitive-procedure-names)
   (map car primitive-procedures))
 (define (primitive-procedure-objects)
@@ -105,6 +106,27 @@
     (define-variable! 'false false initial-env)
     initial-env))
 (define the-global-environment (setup-environment))
+;;;;;;;; done with all boring environment setup stuff above
+
+(define bind extend-environment) ; the chalkboard eval uses "bind"
+
+;;;;;;;; eval definition:
+(define evlist ; evaluate list of expr
+  (lambda (l env)
+    (cond ((eq? l '() ) '() )
+          (else
+           (cons (eval (car l) env) (evlist (cdr l env)) ) ) ) ) )
+(define evcond ; evaluate conditional 'cond expression
+  (lambda (clauses env) ; recall: clauses is a list of lists.  so caar is stuff like "else" or otherwise expressions that eval to false or true
+    (cond ((eq? clauses '()) '()) ; if we ran out of clauses, just arbitrarily return '() (there is choice here)
+          ((eq? (caar clauses) 'else) ; else clause
+           (eval (cadar clauses) env)) ; reached default (else), so always eval.  car of cdr of car of clauses... ELSE is car of car, so (else (__)...) is cdr of car, so we want to eval car of cdr of car
+          ;to clarify: (cadar '( (else (sdf)) ) ) --> (sdf) which is what we want in general
+          ((false? (eval (caar clauses) env)) ; if current clause is false, 
+           (evcond (cdr clauses) env)) ; cdr down to the rest of the clauses
+          (else ; if true clause, short-circuit (eval the current clause)
+           (eval (cadar clauses) env))))) ; see cadar explanation above.  clauses is a list of lists: (list ... (predicate expr) ...).  we want first item of outer list, cadr of that item.  so cadar.
+          
 
 
 
