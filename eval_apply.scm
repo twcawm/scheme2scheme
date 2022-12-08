@@ -138,10 +138,17 @@
       ((and (pair? exp) (eq? (car exp) 'lambda)) (list 'closure (cdr exp) env)) ; lambda (function definition)
       ((and (pair? exp) (eq? (car exp) 'cond)) (evcond (cdr exp) env)) ; cond; we defined evcond as a helper for this
       (else ; combination (not a special form)
-       (apply (eval (car exp) env) (evlist (cdr exp) env)))
+       (appli (eval (car exp) env) (evlist (cdr exp) env)))
       )))
 
+(define (appli proc args)
+  (cond ((primitive? proc) (apply-primop (cadr proc) args))
+        ((eq? (car proc) 'closure) (eval (cadadr proc) (bind (caadr proc) args (caddr proc))))
+        ))
 
+(define apply-primop apply) ;use the built-in apply for primitive ops
+
+(define (primitive? proc) (eq? (car proc) 'primitive))
 
 ;;;tests
 (define frame0 (make-frame (list 'x 'y) (list 5 6 ))) (add-binding-to-frame! 'z 7 frame0) (display frame0) (frame-variables frame0) (frame-values frame0) ;illustrates building a frame
@@ -169,3 +176,4 @@ the-global-environment
 ;tests for eval:
 (eval 5 the-global-environment)
 (eval '(lambda (x) (+ x 5 )) the-global-environment)
+(eval '(+ 4 5) the-global-environment) ; works!
