@@ -1,5 +1,6 @@
 #lang sicp
-(define builtin-apply apply) ;save the native apply for now
+;(define builtin-apply apply) ;save the native apply for now
+;(define builtin-eval eval) ;save the native eval for now
 
 (define (true? x) (not (eq? x false))) ;i suppose this is a more inclusive definition than (eq? x true)
 (define (false? x) (eq? x false))
@@ -126,7 +127,14 @@
            (evcond (cdr clauses) env)) ; cdr down to the rest of the clauses
           (else ; if true clause, short-circuit (eval the current clause)
            (eval (cadar clauses) env))))) ; see cadar explanation above.  clauses is a list of lists: (list ... (predicate expr) ...).  we want first item of outer list, cadr of that item.  so cadar.
-          
+
+(define eval
+  (lambda (exp env)
+    (cond
+      ((number? exp) exp) ; number evaluates to itself
+      ((string? exp) exp) ; string evaluates to itself
+      ((symbol? exp) (lookup-variable-value exp env)) ; symbol evaluates to its lookup value
+      )))
 
 
 
