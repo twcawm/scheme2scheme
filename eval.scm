@@ -1,5 +1,7 @@
 #lang sicp
 
+(define builtin-apply apply) ;save the native apply for now
+
 (define (true? x)
   (eq? x #t))
 (define (false? x)
@@ -31,10 +33,29 @@
           )
     )
   )
-)  
-                       
+)
+#|
+(define apply
+  (lambda (proc args)
+    (cond ((eq? 'closure (car proc))
+           (eval (cadadr proc)
+                 (bind (caadr proc)
+                       args
+                       (caddr proc)
+                       )
+                 )
+           )
+          (else (builtin-apply proc args))
+          )
+    )
+  )
+  |#                     
 ;currently, our eval can do a few things, but cannot handle things like applying a user-defined lambda to an argument (because the built-in apply does not accept how we've stored the closure)
 ;the goal was to see how far we could take the sicp eval without defining our own apply (just using built-in apply)
+;note: I suspect that a fundamental incompatibility between builtin-apply and sicp-apply is the incompatible representation of environments
+;  not to mention that the representation of compound procedures (and any closure) is also different
+;  so to get a fully functional sicp-eval, we might just need to also have a full sicp-apply as well.
+;  we should probably save this attempt to implement sicp-eval/builtin-apply as a separate branch and move on to the full sicp version.
 (define eval (lambda (exp env)
                (cond
                  ((number? exp) exp)
@@ -67,3 +88,4 @@
 ;(eval '(cond ((> 5 4) 6 ) )) ;broken for now
 (eval '(+ 5 6 ) sre5) ;this currently works in mit-scheme
 (eval '( (lambda (x) (+ x 5) ) 3) sre5) ;this fails in mit-scheme because ";The object (closure ((x) (+ x 5)) #[environment 40]) is not applicable."
+;this might be a good place to transition to full sicp-apply/sicp-eval rather than try to mix builtin-apply with sicp-eval
