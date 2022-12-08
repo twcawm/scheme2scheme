@@ -1,5 +1,10 @@
 #lang sicp
 
+(define (true? x)
+  (eq? x #t))
+(define (false? x)
+  (eq? x #f))
+
 (define evlist 
   (lambda (l env)
     (display "in evlist")
@@ -13,12 +18,28 @@
      )
    )
 )
+
+(define evcond
+  (lambda (clauses env)
+    (cond ((eq? clauses '()) '())
+          ((eq? (caar clauses) 'else)
+           (eval (cadar clauses) env))
+          ((false? (eval (caar clauses) env)) ;sicp assumes "false?" predicate is available.  but lang sicp in racket does not appear to have this.
+           (evcond (cdr clauses) env))
+          (else
+           (eval (cadar clauses) env)
+          )
+    )
+  )
+)  
+                       
 ;next, write evcond
 ;and probably need the primitive apply...?
 (define eval (lambda (exp env)
                (cond
                  ((number? exp) exp)
                  ((string? exp) exp) ; for a number or string, evaluates to itself
+                 ((symbol? exp) (display "in symbol") (environment-lookup env exp)) ; just look up the symbol in the environment provided
                  ((and (pair? exp) (eq? (car exp) 'quote)) (car (cdr exp))) ;we're implicitly expecting a pair here; need to improve this
                  ;btw, for quote, it's cadr instead of cdr because (cdr '(quote abc)) evaluates to (abc) (list of one element) when we really just want the first element of that list.
                  ((and (pair? exp) (eq? (car exp) 'lambda)) (display "in lambda def") (list 'closure (cdr exp) env)) ; start lambda definition
@@ -44,4 +65,4 @@
 
 (newline)
 ;(eval '(cond ((> 5 4) 6 ) )) ;broken for now
-(eval '(+ 5 6 ) sre5) ;this currently breaks - I think it is because we do not lookup '+ ! so we need to implement lookup
+(eval '(+ 5 6 ) sre5) ;this currently works in mit-scheme
