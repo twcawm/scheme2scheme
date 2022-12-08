@@ -91,15 +91,15 @@
         (list 'eqv? eqv?)
         ))
 
-(define primitive-procedure-names
+(define (primitive-procedure-names)
   (map car primitive-procedures))
-(define primitive-procedure-objects
-  (map (lambda (proc) list 'primitive (cadr proc)) primitive-procedures))
+(define (primitive-procedure-objects)
+  (map (lambda (proc) (list 'primitive (cadr proc))) primitive-procedures))
 
 (define (setup-environment)
   (let ((initial-env
-         (extend-environment primitive-procedure-names
-                             primitive-procedure-objects
+         (extend-environment (primitive-procedure-names)
+                             (primitive-procedure-objects)
                              the-empty-environment)))
     (define-variable! 'true true initial-env)
     (define-variable! 'false false initial-env)
