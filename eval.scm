@@ -54,6 +54,7 @@
 ;the goal was to see how far we could take the sicp eval without defining our own apply (just using built-in apply)
 ;note: I suspect that a fundamental incompatibility between builtin-apply and sicp-apply is the incompatible representation of environments
 ;  not to mention that the representation of compound procedures (and any closure) is also different
+;  note: the sicp assq function also returns a different value than the builtin: returns '() (sicp) instead of #f (builtin)
 ;  so to get a fully functional sicp-eval, we might just need to also have a full sicp-apply as well.
 ;  we should probably save this attempt to implement sicp-eval/builtin-apply as a separate branch and move on to the full sicp version.
 (define eval (lambda (exp env)
