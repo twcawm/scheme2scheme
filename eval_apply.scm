@@ -64,6 +64,16 @@
     );end of 'env-loop definition
   (env-loop env));set-variable-value is essentially one line after its definitions: it just calls the env-loop routine it defines
 
+(define (define-variable! var val env)
+  (let ((frame (first-frame env)))
+    (define (scan vars vals) ; once again, scan here is quite similar to scan in previous definitions
+      (cond ((null? vars)
+             (add-binding-to-frame! var val frame))
+            ((eq? var (car vars)) (set-car! vals val)) ; we here allow re-definition; it appears to act the same as set!
+            ;another valid choice for the above would actually be to throw an error, since we don't necessarily want to allow re-definition
+            (else (scan (cdr vars) (cdr vals)))))
+    (scan (frame-variables frame) (frame-values frame))))
+  
 (define frame0 (make-frame (list 'x 'y) (list 5 6 ))) (add-binding-to-frame! 'z 7 frame0) (display frame0) (frame-variables frame0) (frame-values frame0) ;illustrates building a frame
 (define env0 (cons frame0 the-empty-environment))
 (define env1 (extend-environment (list 'a 'b 'c) (list "s" "d" "ff") env0)) ;test extend-environment
@@ -73,5 +83,14 @@ env1
 (lookup-variable-value 'x env1) ; works correctly!
 (set-variable-value! 'y "hello" env1) ; works correctly!
 env1
+(define-variable! 'e "newvalue" env1) ; works correctly!
+env1
+(lookup-variable-value 'e env1)
+(define-variable! 'x "new-x-value" env1) ; interesting, so a new inner x actually shadows the outer x here
+env1 ; both the inner x and the outer x are still available
+(lookup-variable-value 'x env1)
+(define-variable! 'a "new-a-value" env1) ; in contrast, when we redefine a variable in the innermost frame, we do not "shadow" its old value.  instead the old value is totally lost.  an alternative option would be to throw an error here.
+env1
+(lookup-variable-value 'a env1)
 ;(first-frame the-empty-environment) ;apparently invalid to call frame selectors on empty environment
 ;(enclosing-environment the-empty-environment) ;apparently invalid to call frame selectors on empty environment
