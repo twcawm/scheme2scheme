@@ -117,7 +117,7 @@
 
 (define (primitive? proc) (eq? (car proc) 'primitive)) ; we type-tag the primitive procedures
 
-;;;;;;;; eval definition:
+;;;;;;;; eval/apply definition:
 (define evlist ; evaluate list of expr
   (lambda (l env)
     (cond ((eq? l '() ) '() )
@@ -125,13 +125,13 @@
            (cons (eval (car l) env) (evlist (cdr l) env)) ) ) ) )
 (define evcond ; evaluate conditional 'cond expression
   (lambda (clauses env) ; recall: clauses is a list of lists.  so caar is stuff like "else" or otherwise expressions that eval to false or true
-    (cond ((eq? clauses '()) '()) ; if we ran out of clauses, just arbitrarily return '() (there is choice here)
+    (cond ((eq? clauses '()) '()) ; if we ran out of clauses, just arbitrarily return '() (could choose something else, for error-checking purposes)
           ((eq? (caar clauses) 'else) ; else clause
            (eval (cadar clauses) env)) ; reached default (else), so always eval.  car of cdr of car of clauses... ELSE is car of car, so (else (__)...) is cdr of car, so we want to eval car of cdr of car
           ;to clarify: (cadar '( (else (sdf)) ) ) --> (sdf) which is what we want in general
           ((false? (eval (caar clauses) env)) ; if current clause is false, 
-           (evcond (cdr clauses) env)) ; cdr down to the rest of the clauses
-          (else ; if true clause, short-circuit (eval the current clause)
+           (evcond (cdr clauses) env)) ; cdr down to the rest of the clauses (in other words, keep going)
+          (else ; if true clause, short-circuit (eval the current clause & return)
            (eval (cadar clauses) env))))) ; see cadar explanation above.  clauses is a list of lists: (list ... (predicate expr) ...).  we want first item of outer list, cadr of that item.  so cadar.
 
 (define eval
@@ -141,7 +141,9 @@
       ((string? exp) exp) ; string evaluates to itself
       ((symbol? exp) (lookup-variable-value exp env)) ; symbol evaluates to its lookup value
       ((and (pair? exp) (eq? (car exp) 'quote)) (cadr exp)) ; quoted expression
-      ((and (pair? exp) (eq? (car exp) 'lambda)) (list 'closure (cdr exp) env)) ; lambda (function definition)
+      ((and (pair? exp) (eq? (car exp) 'lambda)) (list 'closure (cdr exp) env)) ; lambda (function definition).
+      ;if exp is '(lambda (x y) (+ x y)) , then (cdr exp) is '((x y) (+ x y)) , so has the form ((formal-params) (body))
+      ;so this will evaluate to '(closure ((formals) (body)) <env>)
       ((and (pair? exp) (eq? (car exp) 'cond)) (evcond (cdr exp) env)) ; cond; we defined evcond as a helper for this
       (else ; combination (not a special form)
        (appli (eval (car exp) env) (evlist (cdr exp) env)))
@@ -151,6 +153,20 @@
   (cond ((primitive? proc) (apply-primop (cadr proc) args))
         ((eq? (car proc) 'closure) (eval (cadadr proc) (bind (caadr proc) args (caddr proc))))
         ))
+; bind: create new frame with names of formals bound to the values of the arguments passed, and extend the base environment with that frame as the new innermost
+
+;explanation note for appli: our conventional structure for a closure (non-primitive procedure) is:
+;  '(closure ((formal-params) (body)) env)
+;  so: 'closure is car
+;  the cdr is: (((formals) (body)) env)
+;  the car of the cdr is: ((formals) (body))
+;  the cdr of the car of the cdr is: ((body))
+;  the car of the cdr of the car of the cdr is: (body)
+;  so the body is the cadadr of the proc
+;  likewise, the (formals) is the car of the car of the cdr (caadr) of proc
+;  and the cdr of the cdr is (env) so the car of the cdr of the cdr (caddr) is the env of the proc
+
+;  note: we named it "appli" because drracket (our IDE) does not allow us to save the built-in definition of apply otherwise
 
 ;;;tests
 (define frame0 (make-frame (list 'x 'y) (list 5 6 ))) (add-binding-to-frame! 'z 7 frame0) (display frame0) (frame-variables frame0) (frame-values frame0) ;illustrates building a frame
@@ -166,6 +182,7 @@ env1
 env1
 (lookup-variable-value 'e env1)
 (define-variable! 'x "new-x-value" env1) ; interesting, so a new inner x actually shadows the outer x here
+; this sort of explcitly indicates that the scoping will be lexical, as intended.  no chance of over-writing our nonlocal value.  good.
 env1 ; both the inner x and the outer x are still available
 (lookup-variable-value 'x env1)
 (define-variable! 'a "new-a-value" env1) ; in contrast, when we redefine a variable in the innermost frame, we do not "shadow" its old value.  instead the old value is totally lost.  an alternative option would be to throw an error here.
