@@ -113,6 +113,10 @@
 
 (define bind extend-environment) ; the chalkboard eval uses "bind"
 
+(define apply-primop apply) ;use the built-in apply for primitive ops
+
+(define (primitive? proc) (eq? (car proc) 'primitive)) ; we type-tag the primitive procedures
+
 ;;;;;;;; eval definition:
 (define evlist ; evaluate list of expr
   (lambda (l env)
@@ -148,10 +152,6 @@
         ((eq? (car proc) 'closure) (eval (cadadr proc) (bind (caadr proc) args (caddr proc))))
         ))
 
-(define apply-primop apply) ;use the built-in apply for primitive ops
-
-(define (primitive? proc) (eq? (car proc) 'primitive))
-
 ;;;tests
 (define frame0 (make-frame (list 'x 'y) (list 5 6 ))) (add-binding-to-frame! 'z 7 frame0) (display frame0) (frame-variables frame0) (frame-values frame0) ;illustrates building a frame
 (define env0 (cons frame0 the-empty-environment))
@@ -179,3 +179,5 @@ the-global-environment
 (eval 5 the-global-environment)
 (eval '(lambda (x) (+ x 5 )) the-global-environment)
 (eval '(+ 4 5) the-global-environment) ; works!
+(eval '(((lambda (x) (lambda (y) (+ x y ) ) ) 3 ) 4) the-global-environment) ;this illustrates that both procedure evaluation and higher-order-procedures (& closures/capturing free vars) works
+(eval '((lambda (x) (lambda (y) (+ x y ) ) ) 3) the-global-environment) ;partially applied version of the previous example.  showed the representation of the closure with the environment that has bound x to 3 and is waiting to bind y.
