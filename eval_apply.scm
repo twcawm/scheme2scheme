@@ -136,14 +136,13 @@
 
 ; exp is car[(define <var> <value>)] so <value> is cadr & <var> is car
 ; we don't bother with the (define (proc arg1 arg2) <body>) syntax since it's just shorthand
+; note: since eval-define and eval-assign! share the same body except for the dispatch to define-variable! or set-variable-value! we could probably do this in a more elegant way with message-passing or dispatch etc
 (define eval-define
   (lambda (exp env)
     (define-variable! (car exp) (eval (cadr exp) env) env) (display "new define")(newline)))
 (define eval-assign!
   (lambda (exp env)
-    (display (car exp)) (newline)
-    (display (cadr exp)) (newline)
-    (set-variable-value! (car exp) (cadr exp) env) (display "assign!")(newline)))
+    (set-variable-value! (car exp) (eval (cadr exp) env) env) (display "assign!")(newline)))
       
     
 
@@ -223,3 +222,8 @@ the-global-environment
 (eval 'x the-global-environment)
 (eval '(set! x "new-value-for-x") the-global-environment) ; assignment to simple values works
 (eval 'x the-global-environment) ; assignment to simple values works
+(eval '(set! x (+ 4 9)) the-global-environment)
+(eval 'x the-global-environment) ; there appears to be a bug when we set! a variable in this manner
+;native scheme gives us the result of the evaluation of the value
+;our version just gives us '(+ 4 9)
+;fixed: now we get the evaluated value, which matches native mit-scheme
