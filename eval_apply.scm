@@ -211,3 +211,5 @@ the-global-environment
 (eval '(define newvar "hello world") the-global-environment) ; works
 (eval '(define newfun (lambda (x y ) (- x y))) the-global-environment) ; works
 (eval '(newfun 5 7) the-global-environment) ; works; applied our user-defined function to values
+(eval '(newfun (+ 2 3 ) (/ 14 2)) the-global-environment) ; nested eval-apply works
+(eval '(newfun (newfun 9 4) (newfun 11 2)) the-global-environment) ; nested compound eval-apply works
