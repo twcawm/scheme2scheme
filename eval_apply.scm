@@ -138,7 +138,12 @@
 ; we don't bother with the (define (proc arg1 arg2) <body>) syntax since it's just shorthand
 (define eval-define
   (lambda (exp env)
-    (define-variable! (car exp) (eval (cadr exp) env) env) "new definition"))
+    (define-variable! (car exp) (eval (cadr exp) env) env) (display "new define")(newline)))
+(define eval-assign!
+  (lambda (exp env)
+    (display (car exp)) (newline)
+    (display (cadr exp)) (newline)
+    (set-variable-value! (car exp) (cadr exp) env) (display "assign!")(newline)))
       
     
 
@@ -151,6 +156,7 @@
       ((symbol? exp) (lookup-variable-value exp env)) ; symbol evaluates to its lookup value
       ((and (pair? exp) (eq? (car exp) 'quote)) (cadr exp)) ; quoted expression
       ((and (pair? exp) (eq? (car exp) 'define)) (eval-define (cdr exp) env)) ; definition
+      ((and (pair? exp) (eq? (car exp) 'set!)) (eval-assign! (cdr exp) env)) ; assignment!
       ((and (pair? exp) (eq? (car exp) 'lambda)) (list 'closure (cdr exp) env)) ; lambda (function definition).
       ;if exp is '(lambda (x y) (+ x y)) , then (cdr exp) is '((x y) (+ x y)) , so has the form ((formal-params) (body))
       ;so this will evaluate to '(closure ((formals) (body)) <env>)
@@ -213,3 +219,7 @@ the-global-environment
 (eval '(newfun 5 7) the-global-environment) ; works; applied our user-defined function to values
 (eval '(newfun (+ 2 3 ) (/ 14 2)) the-global-environment) ; nested eval-apply works
 (eval '(newfun (newfun 9 4) (newfun 11 2)) the-global-environment) ; nested compound eval-apply works
+(eval '(define x 3) the-global-environment)
+(eval 'x the-global-environment)
+(eval '(set! x "new-value-for-x") the-global-environment) ; assignment to simple values works
+(eval 'x the-global-environment) ; assignment to simple values works
