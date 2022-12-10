@@ -134,6 +134,15 @@
           (else ; if true clause, short-circuit (eval the current clause & return)
            (eval (cadar clauses) env))))) ; see cadar explanation above.  clauses is a list of lists: (list ... (predicate expr) ...).  we want first item of outer list, cadr of that item.  so cadar.
 
+; exp is car[(define <var> <value>)] so <value> is cadr & <var> is car
+; we don't bother with the (define (proc arg1 arg2) <body>) syntax since it's just shorthand
+(define eval-define
+  (lambda (exp env)
+    (define-variable! (car exp) (eval (cadr exp) env) env) "new definition"))
+      
+    
+
+
 (define eval
   (lambda (exp env)
     (cond
@@ -141,6 +150,7 @@
       ((string? exp) exp) ; string evaluates to itself
       ((symbol? exp) (lookup-variable-value exp env)) ; symbol evaluates to its lookup value
       ((and (pair? exp) (eq? (car exp) 'quote)) (cadr exp)) ; quoted expression
+      ((and (pair? exp) (eq? (car exp) 'define)) (eval-define (cdr exp) env)) ; definition
       ((and (pair? exp) (eq? (car exp) 'lambda)) (list 'closure (cdr exp) env)) ; lambda (function definition).
       ;if exp is '(lambda (x y) (+ x y)) , then (cdr exp) is '((x y) (+ x y)) , so has the form ((formal-params) (body))
       ;so this will evaluate to '(closure ((formals) (body)) <env>)
@@ -198,3 +208,6 @@ the-global-environment
 (eval '(+ 4 5) the-global-environment) ; works!
 (eval '(((lambda (x) (lambda (y) (+ x y ) ) ) 3 ) 4) the-global-environment) ;this illustrates that both procedure evaluation and higher-order-procedures (& closures/capturing free vars) works
 (eval '((lambda (x) (lambda (y) (+ x y ) ) ) 3) the-global-environment) ;partially applied version of the previous example.  showed the representation of the closure with the environment that has bound x to 3 and is waiting to bind y.
+(eval '(define newvar "hello world") the-global-environment) ; works
+(eval '(define newfun (lambda (x y ) (- x y))) the-global-environment) ; works
+(eval '(newfun 5 7) the-global-environment) ; works; applied our user-defined function to values
