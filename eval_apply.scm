@@ -224,6 +224,9 @@ the-global-environment
 (eval 'x the-global-environment) ; assignment to simple values works
 (eval '(set! x (+ 4 9)) the-global-environment)
 (eval 'x the-global-environment) ; there appears to be a bug when we set! a variable in this manner
+(eval '(define make_plus (lambda (x) (lambda (y) (+ x y)))) the-global-environment) ;test higher-order function
+(eval '(define plus_three (make_plus 3)) the-global-environment)
+(eval '(plus_three 4) the-global-environment)  ;higher-order function appears to work
 ;native scheme gives us the result of the evaluation of the value
 ;our version just gives us '(+ 4 9)
 ;fixed: now we get the evaluated value, which matches native mit-scheme
