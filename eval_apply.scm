@@ -234,5 +234,7 @@ the-global-environment
 (eval '(multi-expr 4) the-global-environment) ; found bug in multi-expr compound procedure
 (eval '(define sum-up (lambda (x) (cond ((= x 0) 0) (else (+ x (sum-up (- x 1))))))) the-global-environment)
 (eval '(sum-up 5) the-global-environment) ; nice, recursion works
+(eval '(define f1 (lambda (x) (define a 5) (define b (+ a x)) (+ a b ))) the-global-environment)
+(eval '(f1 10) the-global-environment) ;produces 20.  note: flipping the definitions of a and b results in unbound variable error, same as in mit-scheme.
 ;(eval '(car (cdr (car (cdr multi-expr)))) the-global-environment) ; cadadr proc
 ;(eval '(cdr (car (cdr multi-expr))) the-global-environment) ; cdadr proc: this is what we probably need: a sequence of expr as the body of compound proc.
