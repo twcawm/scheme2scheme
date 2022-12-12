@@ -1,6 +1,4 @@
-#lang sicp
-;(define builtin-apply apply) ;save the native apply for now
-;(define builtin-eval eval) ;save the native eval for now
+#lang sicp ;this is required for drracket ide; comment out for mit-scheme
 
 (define (true? x) (not (eq? x false))) ;i suppose this is a more inclusive definition than (eq? x true)
 (define (false? x) (eq? x false))
@@ -75,8 +73,6 @@
             (else (scan (cdr vars) (cdr vals)))))
     (scan (frame-variables frame) (frame-values frame))))
 
-
-
 (define primitive-procedures ;we get primitive procedures from the underlying scheme implementation
   (list (list 'car car)
         (list 'cdr cdr)
@@ -143,9 +139,6 @@
 (define eval-assign!
   (lambda (exp env)
     (set-variable-value! (car exp) (eval (cadr exp) env) env) (display "assign!")(newline)))
-      
-    
-
 
 (define eval
   (lambda (exp env)
