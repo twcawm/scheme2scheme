@@ -232,5 +232,7 @@ the-global-environment
 (eval '(plus_three n) the-global-environment)
 (eval '(define multi-expr (lambda (x) (set! x (+ x 7)) (set! x (+ x 5)) x ) ) the-global-environment)
 (eval '(multi-expr 4) the-global-environment) ; found bug in multi-expr compound procedure
+(eval '(define sum-up (lambda (x) (cond ((= x 0) 0) (else (+ x (sum-up (- x 1))))))) the-global-environment)
+(eval '(sum-up 5) the-global-environment) ; nice, recursion works
 ;(eval '(car (cdr (car (cdr multi-expr)))) the-global-environment) ; cadadr proc
 ;(eval '(cdr (car (cdr multi-expr))) the-global-environment) ; cdadr proc: this is what we probably need: a sequence of expr as the body of compound proc.
