@@ -225,3 +225,6 @@ the-global-environment
 ;fixed: now we get the evaluated value, which matches native mit-scheme
 (eval '(define n 7) the-global-environment)
 (eval '(plus_three n) the-global-environment)
+(eval '(define multi-expr (lambda (x) (set! x (+ x 7)) (set! x (+ x 5)) x ) ) the-global-environment)
+(eval 'x the-global-environment)
+(eval '(multi-expr 4) the-global-environment) ; found bug in multi-expression compound procedure
