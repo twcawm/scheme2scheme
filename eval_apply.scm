@@ -183,7 +183,7 @@
 
 ;  note: we named it "appli" because drracket (our IDE) does not allow us to save the built-in definition of apply otherwise
 
-;;;tests
+;;;tests for environment & lookups
 (define frame0 (make-frame (list 'x 'y) (list 5 6 ))) (add-binding-to-frame! 'z 7 frame0) (display frame0) (frame-variables frame0) (frame-values frame0) ;illustrates building a frame
 (define env0 (cons frame0 the-empty-environment))
 (define env1 (extend-environment (list 'a 'b 'c) (list "s" "d" "ff") env0)) ;test extend-environment
