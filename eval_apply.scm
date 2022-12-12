@@ -129,6 +129,11 @@
            (evcond (cdr clauses) env)) ; cdr down to the rest of the clauses (in other words, keep going)
           (else ; if true clause, short-circuit (eval the current clause & return)
            (eval (cadar clauses) env))))) ; see cadar explanation above.  clauses is a list of lists: (list ... (predicate expr) ...).  we want first item of outer list, cadr of that item.  so cadar.
+(define evseq ; evaluate sequence of expr
+  (lambda (l env)
+    (cond ((eq? (cdr l) '() ) (eval (car l) env)) ; if we reached the last expr in the list, evaluate it (and return its value)
+          (else
+           (eval (car l) env) (evseq (cdr l) env))))) ; otherwise, use scheme's built in sequence-of-expr syntax to evaluate the sequence
 
 ; exp is car[(define <var> <value>)] so <value> is cadr & <var> is car
 ; we don't bother with the (define (proc arg1 arg2) <body>) syntax since it's just shorthand
@@ -159,7 +164,8 @@
 
 (define (appli proc args)
   (cond ((primitive? proc) (apply-primop (cadr proc) args))
-        ((eq? (car proc) 'closure) (eval (cadadr proc) (bind (caadr proc) args (caddr proc))))
+        ((eq? (car proc) 'closure) (display "proc:") (display proc) (display "cadadr of proc: ") (display (cadadr proc)) (display (cdadr proc)) (newline)
+                                   (evseq (cdadr proc) (bind (caadr proc) args (caddr proc))))
         ))
 ; bind: create new frame with names of formals bound to the values of the arguments passed, and extend the base environment with that frame as the new innermost
 
@@ -226,5 +232,6 @@ the-global-environment
 (eval '(define n 7) the-global-environment)
 (eval '(plus_three n) the-global-environment)
 (eval '(define multi-expr (lambda (x) (set! x (+ x 7)) (set! x (+ x 5)) x ) ) the-global-environment)
-(eval 'x the-global-environment)
-(eval '(multi-expr 4) the-global-environment) ; found bug in multi-expression compound procedure
+(eval '(multi-expr 4) the-global-environment) ; found bug in multi-expr compound procedure
+(eval '(car (cdr (car (cdr multi-expr)))) the-global-environment) ; cadadr proc
+(eval '(cdr (car (cdr multi-expr))) the-global-environment) ; cdadr proc: this is what we probably need: a sequence of expr as the body of compound proc.
