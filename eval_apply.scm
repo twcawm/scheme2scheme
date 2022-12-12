@@ -223,3 +223,5 @@ the-global-environment
 ;native scheme gives us the result of the evaluation of the value
 ;our version just gives us '(+ 4 9)
 ;fixed: now we get the evaluated value, which matches native mit-scheme
+(eval '(define n 7) the-global-environment)
+(eval '(plus_three n) the-global-environment)
