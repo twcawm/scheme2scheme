@@ -123,7 +123,8 @@
   (lambda (clauses env) ; recall: clauses is a list of lists.  so caar is stuff like "else" or otherwise expressions that eval to false or true
     (cond ((eq? clauses '()) '()) ; if we ran out of clauses, just arbitrarily return '() (could choose something else, for error-checking purposes)
           ((eq? (caar clauses) 'else) ; else clause
-           (eval (cadar clauses) env)) ; reached default (else), so always eval.  car of cdr of car of clauses... ELSE is car of car, so (else (__)...) is cdr of car, so we want to eval car of cdr of car
+           (display (cdar clauses))
+           (evseq (cdar clauses) env)) ; reached default (else), so always eval.  car of cdr of car of clauses... ELSE is car of car, so (else (__)...) is cdr of car, so we want to eval car of cdr of car
           ;to clarify: (cadar '( (else (sdf)) ) ) --> (sdf) which is what we want in general
           ((false? (eval (caar clauses) env)) ; if current clause is false, 
            (evcond (cdr clauses) env)) ; cdr down to the rest of the clauses (in other words, keep going)
