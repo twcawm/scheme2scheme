@@ -152,6 +152,7 @@
       ((string? exp) exp) ; string evaluates to itself
       ((symbol? exp) (lookup-variable-value exp env)) ; symbol evaluates to its lookup value
       ((and (pair? exp) (eq? (car exp) 'quote)) (cadr exp)) ; quoted expression
+      ((and (pair? exp) (eq? (car exp) 'begin)) (evseq (cdr exp) env)) ;when we have a begin expr, (begin exp1 exp2 ...) evaluate the following sequence of exp
       ((and (pair? exp) (eq? (car exp) 'define)) (eval-define (cdr exp) env)) ; definition
       ((and (pair? exp) (eq? (car exp) 'set!)) (eval-assign! (cdr exp) env)) ; assignment!
       ((and (pair? exp) (eq? (car exp) 'lambda)) (list 'closure (cdr exp) env)) ; lambda (function definition).
@@ -244,3 +245,4 @@ the-global-environment
 (eval '(cond ((> 4 5) "4 > 5" (set! res 1) "4>5 second expr") (else "else" (set! res 2) "else second expr")) the-global-environment) ;noticed
 (eval 'res the-global-environment) ;verified that all expressions in list-of-expr in cond clauses are evaluated
 (eval '(begin (define bvar 5) (set! bvar 6)) the-global-environment) ; test 'begin' expression
+(eval 'bvar the-global-environment)
