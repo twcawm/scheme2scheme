@@ -238,6 +238,8 @@ the-global-environment
 (eval '(f1 10) the-global-environment) ;produces 20.  note: flipping the definitions of a and b results in unbound variable error, same as in mit-scheme.
 ;(eval '(car (cdr (car (cdr multi-expr)))) the-global-environment) ; cadadr proc
 ;(eval '(cdr (car (cdr multi-expr))) the-global-environment) ; cdadr proc: this is what we probably need: a sequence of expr as the body of compound proc.
-(eval '(define res 0) the-global-environment) 
+(eval '(define res 0) the-global-environment)
+(eval '(cond ((< 4 5) "4 < 5" (set! res 1) "4<5 second expr") (else "else" (set! res 2) "else second expr")) the-global-environment) ;noticed
+(eval 'res the-global-environment)
 (eval '(cond ((> 4 5) "4 > 5" (set! res 1) "4>5 second expr") (else "else" (set! res 2) "else second expr")) the-global-environment) ;noticed
 (eval 'res the-global-environment) ;verified that all expressions in list-of-expr in cond clauses are evaluated
