@@ -123,13 +123,12 @@
   (lambda (clauses env) ; recall: clauses is a list of lists.  so caar is stuff like "else" or otherwise expressions that eval to false or true
     (cond ((eq? clauses '()) '()) ; if we ran out of clauses, just arbitrarily return '() (could choose something else, for error-checking purposes)
           ((eq? (caar clauses) 'else) ; else clause
-           (display (cdar clauses))
-           (evseq (cdar clauses) env)) ; reached default (else), so always eval.  car of cdr of car of clauses... ELSE is car of car, so (else (__)...) is cdr of car, so we want to eval car of cdr of car
+           (evseq (cdar clauses) env)) ;note: updated from eval cadar to evseq cdar (instead of evaluating only 1 expr, evseq a sequence of expr) ; reached default (else), so always eval.  car of cdr of car of clauses... ELSE is car of car, so (else (__)...) is cdr of car, so we want to eval car of cdr of car
           ;to clarify: (cadar '( (else (sdf)) ) ) --> (sdf) which is what we want in general
           ((false? (eval (caar clauses) env)) ; if current clause is false, 
            (evcond (cdr clauses) env)) ; cdr down to the rest of the clauses (in other words, keep going)
           (else ; if true clause, short-circuit (eval the current clause & return)
-           (eval (cadar clauses) env))))) ; see cadar explanation above.  clauses is a list of lists: (list ... (predicate expr) ...).  we want first item of outer list, cadr of that item.  so cadar.
+           (evseq (cdar clauses) env))))) ;note: updated from eval cadar to evseq cdar (instead of evaluating only 1 expr, evseq a sequence of expr) ; see cadar explanation above.  clauses is a list of lists: (list ... (predicate expr) ...).  we want first item of outer list, cadr of that item.  so cadar.
 (define evseq ; evaluate sequence of expr. we are implementing this for procedure bodies, but it could also be used for "begin" expressions.
   (lambda (l env)
     (cond ((eq? (cdr l) '() ) (eval (car l) env)) ; if we reached the last expr in the list, evaluate it (and return its value)
