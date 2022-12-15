@@ -254,3 +254,7 @@ the-global-environment
 (eval '(define test_force (delay (+ 4 5 ) ) ) the-global-environment)
 ;(eval 'test_force the-global-environment)
 (eval '(force test_force) the-global-environment) ; force / delay appear to work
+(eval '(define test_delayed_def (delay (lambda (x y) (+ x y)))) the-global-environment) ;test delaying the definition of a function!
+(eval 'test_delayed_def the-global-environment)
+(eval '(define delayed_def (force test_delayed_def) ) the-global-environment) ;force the definition to occur
+(eval '(delayed_def 7 8) the-global-environment) ;test the function
