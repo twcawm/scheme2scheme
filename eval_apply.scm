@@ -182,6 +182,8 @@
 
 ;  note: we named it "appli" because drracket (our IDE) does not allow us to save the built-in definition of apply otherwise
 
+;try to implement "delay" and "force" as "standard library" in the sense that we will define them as procedures:
+
 ;;;tests for environment & lookups
 (define frame0 (make-frame (list 'x 'y) (list 5 6 ))) (add-binding-to-frame! 'z 7 frame0) (display frame0) (frame-variables frame0) (frame-values frame0) ;illustrates building a frame
 (define env0 (cons frame0 the-empty-environment))
@@ -207,11 +209,14 @@ the-global-environment
 ;(enclosing-environment the-empty-environment) ;apparently invalid to call frame selectors on empty environment
 
 ;tests for eval:
+(eval '(define delay (lambda (expr) (lambda () expr))) the-global-environment)
+(eval '(define force (lambda (expr) (expr))) the-global-environment)
+
 (eval 5 the-global-environment)
 (eval '(lambda (x) (+ x 5 )) the-global-environment)
 (eval '(+ 4 5) the-global-environment) ; works!
 (eval '(((lambda (x) (lambda (y) (+ x y ) ) ) 3 ) 4) the-global-environment) ;this illustrates that both procedure evaluation and higher-order-procedures (& closures/capturing free vars) works
-(eval '((lambda (x) (lambda (y) (+ x y ) ) ) 3) the-global-environment) ;partially applied version of the previous example.  showed the representation of the closure with the environment that has bound x to 3 and is waiting to bind y.
+;(eval '((lambda (x) (lambda (y) (+ x y ) ) ) 3) the-global-environment) ;partially applied version of the previous example.  showed the representation of the closure with the environment that has bound x to 3 and is waiting to bind y.
 (eval '(define newvar "hello world") the-global-environment) ; works
 (eval '(define newfun (lambda (x y ) (- x y))) the-global-environment) ; works
 (eval '(newfun 5 7) the-global-environment) ; works; applied our user-defined function to values
@@ -246,3 +251,6 @@ the-global-environment
 (eval 'res the-global-environment) ;verified that all expressions in list-of-expr in cond clauses are evaluated
 (eval '(begin (define bvar 5) (set! bvar 6)) the-global-environment) ; test 'begin' expression
 (eval 'bvar the-global-environment)
+(eval '(define test_force (delay (+ 4 5 ) ) ) the-global-environment)
+;(eval 'test_force the-global-environment)
+(eval '(force test_force) the-global-environment) ; force / delay appear to work
