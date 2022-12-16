@@ -265,3 +265,12 @@ the-global-environment
 (eval '(f2c 212) the-global-environment) ;we created a fahrenheit to celsius conversion function by composing an addition with mult
 (eval '(f2c 32 ) the-global-environment) 
 (eval '(f2c -40) the-global-environment) ;works on the tests tried
+(eval '(define make-localvarc (lambda () (define x 5) (lambda () (set! x (+ x 1)) x ) ) ) the-global-environment)
+(eval '(define f_a (make-localvarc)) the-global-environment)
+(eval '(define f_b (make-localvarc)) the-global-environment)
+(eval '(f_a) the-global-environment)
+(eval '(f_a) the-global-environment)
+(eval '(f_a) the-global-environment)
+(eval '(f_b) the-global-environment)
+(eval '(f_b) the-global-environment)
+(eval '(f_b) the-global-environment) ;make-localvarc made two closures which each have their own copy of the local variable.  this is correct.
