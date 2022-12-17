@@ -208,10 +208,21 @@ the-global-environment
 ;(first-frame the-empty-environment) ;apparently invalid to call frame selectors on empty environment
 ;(enclosing-environment the-empty-environment) ;apparently invalid to call frame selectors on empty environment
 
-;tests for eval:
+
+
+;;;; "standard library": delay, force
 (eval '(define delay (lambda (expr) (lambda () expr))) the-global-environment)
 (eval '(define force (lambda (expr) (expr))) the-global-environment)
+(eval '(define memo-proc
+    (lambda (proc)
+      (define already-run? false) (define result false)
+      (lambda ()
+        (cond ((not already-run?) (display "running delayed-obj!")(newline) (set! result (proc)) (set! already-run? true) result)
+              (else (display "memo-return!")(newline) result))))) the-global-environment)
+(eval '(define mdelay (lambda (expr) (memo-proc (lambda () expr)))) the-global-environment) ;memoized version of delay!
 
+
+;tests for eval:
 (eval 5 the-global-environment)
 (eval '(lambda (x) (+ x 5 )) the-global-environment)
 (eval '(+ 4 5) the-global-environment) ; works!
