@@ -90,6 +90,7 @@
         (list 'eqv? eqv?)
         (list 'not not)
         (list 'display display)
+        (list 'newline newline)
         ))
 
 ; not 100% why we implement primitive names and procedures as (no-argument) procedures instead of just lists, but it would work either way
