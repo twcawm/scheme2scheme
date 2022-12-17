@@ -258,6 +258,11 @@ the-global-environment
 (eval 'test_delayed_def the-global-environment)
 (eval '(define delayed_def (force test_delayed_def) ) the-global-environment) ;force the definition to occur
 (eval '(delayed_def 7 8) the-global-environment) ;test the function
+(eval '(define nestDelay (delay (delay (+ 4 5)))) the-global-environment) ;test nested delay
+(eval '(define oneDelay (delay (+ 4 5))) the-global-environment)
+;(eval 'oneDelay the-global-environment) ;also verified that single delay also acts this way - if we evaluate it we can see that it looks like the body has already been evaluated to '9'
+(eval '(force (force nestDelay)) the-global-environment) ;nested delay appears to work, although! when we only force once, it does appear that the (+ 4 5) has already been evaluated.  so I'm not sure if this could be a "true" force/delay mechanism.  it just acts like one?
+
 (eval '(define compose-with-mult (lambda (f0 multNum) (lambda (x) (* multNum (f0 x))))) the-global-environment)
 ;a function of two params (f0 and multNum) that returns a function of 1 parameter which returns the result of multiplying the number multNum by the result of f0 x
 (eval '(define f (lambda (x) (- x 32))) the-global-environment)
