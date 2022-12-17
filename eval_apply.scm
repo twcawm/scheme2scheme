@@ -290,3 +290,7 @@ the-global-environment
 (eval '(f_b) the-global-environment)
 (eval '(f_b) the-global-environment)
 (eval '(f_b) the-global-environment) ;make-localvarc made two closures which each have their own copy of the local variable.  this is correct.
+
+(eval '(define memo-delay-add (mdelay (+ 8 9))) the-global-environment) ; test memoized delay
+(eval '(force memo-delay-add) the-global-environment) ; run the delayed procedure
+(eval '(force memo-delay-add) the-global-environment) ; direct memoized return
