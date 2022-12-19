@@ -197,6 +197,21 @@
               (else (display "memo-return!")(newline) result))))) the-global-environment)
 (eval '(define mdelay (lambda (expr) (memo-proc (lambda () expr)))) the-global-environment) ;memoized version of delay!
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;repl
+(define (prompt-input instr)
+  (newline) (newline) (display instr) (newline))
+(define (announce-output outstr)
+  (newline) (display outstr) (newline))
+
+(define (reploop) ;a procedure with no arguments
+  (prompt-input "scheme2scheme:=> ")
+  (let ((input (read)))
+    (let ((output (eval input the-global-environment)))
+      (announce-output ";Value: ")
+      (display output)))
+  (reploop))
+
 
 #|
 ;;;tests for environment & lookups
