@@ -186,7 +186,19 @@
 ;  note: we named it "appli" because drracket (our IDE) does not allow us to save the built-in definition of apply otherwise
 
 ;try to implement "delay" and "force" as "standard library" in the sense that we will define them as procedures:
+;;;; "standard library": delay, force
+(eval '(define delay (lambda (expr) (lambda () expr))) the-global-environment)
+(eval '(define force (lambda (expr) (expr))) the-global-environment)
+(eval '(define memo-proc
+    (lambda (proc)
+      (define already-run? false) (define result false)
+      (lambda ()
+        (cond ((not already-run?) (display "running delayed-obj!")(newline) (set! result (proc)) (set! already-run? true) result)
+              (else (display "memo-return!")(newline) result))))) the-global-environment)
+(eval '(define mdelay (lambda (expr) (memo-proc (lambda () expr)))) the-global-environment) ;memoized version of delay!
 
+
+#|
 ;;;tests for environment & lookups
 (define frame0 (make-frame (list 'x 'y) (list 5 6 ))) (add-binding-to-frame! 'z 7 frame0) (display frame0) (frame-variables frame0) (frame-values frame0) ;illustrates building a frame
 (define env0 (cons frame0 the-empty-environment))
@@ -213,16 +225,6 @@ the-global-environment
 
 
 
-;;;; "standard library": delay, force
-(eval '(define delay (lambda (expr) (lambda () expr))) the-global-environment)
-(eval '(define force (lambda (expr) (expr))) the-global-environment)
-(eval '(define memo-proc
-    (lambda (proc)
-      (define already-run? false) (define result false)
-      (lambda ()
-        (cond ((not already-run?) (display "running delayed-obj!")(newline) (set! result (proc)) (set! already-run? true) result)
-              (else (display "memo-return!")(newline) result))))) the-global-environment)
-(eval '(define mdelay (lambda (expr) (memo-proc (lambda () expr)))) the-global-environment) ;memoized version of delay!
 
 
 ;tests for eval:
@@ -297,3 +299,4 @@ the-global-environment
 (eval '(define memo-delay-add (mdelay (+ 8 9))) the-global-environment) ; test memoized delay
 (eval '(force memo-delay-add) the-global-environment) ; run the delayed procedure
 (eval '(force memo-delay-add) the-global-environment) ; direct memoized return
+|#
